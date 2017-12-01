@@ -1,0 +1,58 @@
+#!/bin/sh
+die(){
+	echo "$1" >&2
+	exit 1
+}
+
+usage(){
+	die "Usage: $(basename "$0") <PDF_FILE> [<OUTPUT_DIR>]"
+}
+
+pdf_getfield(){
+	FIELD="$1"
+	PDF="$2"
+	[ "$2" ] || PDF="$PDF_FILE"
+
+	pdfgrep "${FIELD}:" "$PDF" |head -1 |sed -e "s%^.*:[[:blank:]]\+%%"
+}
+
+pdf_numpages(){
+	PDF="$1"
+	[ "$1" ] || PDF="$PDF_FILE"
+	pdftk "$PDF" dump_data | sed -ne "/^NumberOfPages:/{s%^.*:[[:blank:]]\+%%;p}"
+
+}
+
+pdf_getgroup(){
+	pdf_getfield "GRUPO" "$1"
+}
+
+pdf_getalunom(){
+	pdf_getfield "Alumno/a" "$1"
+}
+
+
+[ "$1" ] || usage
+PDF_FILE="$1"
+
+shift
+OUT_DIR="$1"
+if [ -z "$1" ] ; then
+	OUT_DIR="./boletines"
+fi
+
+NUMPAGES="$(pdf_numpages)"
+
+if [ -z "$NUMPAGES" ] || [ $NUMPAGES -le 0 ] ; then
+	die "Error detectando el número de páginas del PDF"
+fi
+
+echo "Generando boletines en \"$OUT_DIR\""
+
+nump=1
+while [ $nump -le $NUMPAGES ]; do
+	
+
+	nump=$(($nump + 1))
+done
+
